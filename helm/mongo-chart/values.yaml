@@ -1,0 +1,47 @@
+# MongoDB replicas
+replicaCount: 3
+
+# MongoDB image
+image:
+  repository: mongo
+  tag: "6.0"
+  pullPolicy: IfNotPresent
+
+# Replica set name
+replicaSetName: rs0
+
+# Service
+service:
+  port: 27017
+
+# Storage
+storage:
+  className: gp2
+  size: 10Gi
+
+# Resources
+resources:
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+# Probes
+readinessProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  failureThreshold: 6
+
+livenessProbe:
+  initialDelaySeconds: 60
+  periodSeconds: 20
+  failureThreshold: 3
+
+# Backup
+backup:
+  enabled: false
+  schedule: "0 2 * * *"
+  s3Bucket: "your-backup-bucket"
+  s3Region: "ap-southeast-2"

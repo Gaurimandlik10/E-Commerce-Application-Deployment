@@ -1,0 +1,86 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_DEFAULT_REGION    = 'ap-southeast-2'
+        AWS_ACCOUNT_ID        = '500345929326'
+        AWS_ACCESS_KEY_ID     = credentials('aws-access-key')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-key')
+        ECR_REPO              = 'ecommerce-node'
+        IMAGE_TAG             = "build-${env.BUILD_NUMBER}"
+        ECR_URL               = "${AWS_ACCOUNT_ID}.dkr.ecr.ap-southeast-2.amazonaws.com"
+    }
+
+    stages {
+        stage('Install and Test') {
+            steps {
+                sh 'npm install'
+                sh 'npm test'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build -t ${ECR_REPO}:${IMAGE_TAG} ."
+            }
+        }
+
+        stage('Trivy Security Scan') {
+            steps {
+                sh """
+                    trivy image \
+                      --severity CRITICAL \
+                      --exit-code 1 \
+                      --no-progress \
+                      ${ECR_REPO}:${IMAGE_TAG}
+                """
+            }
+        }
+
+        stage('Push to ECR') {
+            steps {
+                sh """
+                    aws ecr get-login-password \
+                      --region ${AWS_DEFAULT_REGION} | \
+                    docker login \
+                      --username AWS \
+                      --password-stdin ${ECR_URL}
+
+                    docker tag ${ECR_REPO}:${IMAGE_TAG} \
+                      ${ECR_URL}/${ECR_REPO}:${IMAGE_TAG}
+
+                    docker push \
+                      ${ECR_URL}/${ECR_REPO}:${IMAGE_TAG}
+                """
+            }
+        }
+
+        stage('Update Helm Values') {
+            steps {
+                sh """
+                    sed -i 's|tag:.*|tag: "${IMAGE_TAG}"|g' \
+                      helm/node-chart/values.yaml
+
+                    git config user.email "jenkins@ci.com"
+                    git config user.name "Jenkins"
+                    git add helm/node-chart/values.yaml
+                    git commit -m "ci: update node image to ${IMAGE_TAG}"
+                    git push origin main
+                """
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Node pipeline done! Argo CD deploying!'
+        }
+        failure {
+            echo '❌ Pipeline failed!'
+        }
+        always {
+            sh "docker rmi ${ECR_REPO}:${IMAGE_TAG} || true"
+            sh "docker system prune -f || true"
+        }
+    }
+}

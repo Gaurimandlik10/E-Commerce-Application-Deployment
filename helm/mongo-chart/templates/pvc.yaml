@@ -1,0 +1,18 @@
+{{- range $i := until (.Values.replicaCount | int) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-data-mongo-{{ $i }}
+  namespace: ecommerce
+  labels:
+    app: mongo
+    index: "{{ $i }}"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ $.Values.storage.className }}
+  resources:
+    requests:
+      storage: {{ $.Values.storage.size }}
+---
+{{- end }}

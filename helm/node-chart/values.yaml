@@ -1,0 +1,34 @@
+replicaCount: 2
+
+image:
+  repository: ""
+  tag: "latest"
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 3000
+  targetPort: 3000
+
+env:
+  MONGO_URL: "mongodb://mongo-0.mongo-headless.ecommerce.svc.cluster.local:27017,mongo-1.mongo-headless.ecommerce.svc.cluster.local:27017,mongo-2.mongo-headless.ecommerce.svc.cluster.local:27017/ecommerce?replicaSet=rs0"
+  PORT: "3000"
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "256Mi"
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 15
+  cpuUtilization: 60
+
+serviceMonitor:
+  enabled: true
+  interval: 15s
+  path: /metrics

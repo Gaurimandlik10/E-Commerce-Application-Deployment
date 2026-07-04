@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: ecommerce-apps
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - app: react-frontend
+        chart: helm/react-chart
+        release: react
+      - app: node-backend
+        chart: helm/node-chart
+        release: node
+      - app: mongodb
+        chart: helm/mongo-chart
+        release: mongo
+
+  template:
+    metadata:
+      name: '{{app}}'
+      namespace: argocd
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/Gaurimandlik10
+        targetRevision: main
+        path: '{{chart}}'
+        helm:
+          releaseName: '{{release}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: ecommerce
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true

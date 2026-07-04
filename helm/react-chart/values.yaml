@@ -1,0 +1,31 @@
+replicaCount: 2
+
+image:
+  repository: ""
+  tag: "latest"
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+
+ingress:
+  enabled: true
+  host: ecommerce.local
+  path: /
+  pathType: Prefix
+
+resources:
+  requests:
+    cpu: "50m"
+    memory: "64Mi"
+  limits:
+    cpu: "200m"
+    memory: "128Mi"
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  cpuUtilization: 70

@@ -1,0 +1,13 @@
+apiVersion: v2
+name: mongo-chart
+description: MongoDB StatefulSet for E-Commerce
+type: application
+version: 0.1.0
+appVersion: "6.0"
+keywords:
+  - mongodb
+  - database
+  - statefulset
+maintainers:
+  - name: Gauri
+    email: gauri@example.com

@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mongo-backup
+  namespace: ecommerce
+spec:
+  schedule: "0 2 * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: mongo-backup-sa
+          containers:
+          - name: backup
+            image: mongo:6
+            command:
+            - bash
+            - -c
+            - |
+              DATE=$(date +%Y%m%d-%H%M%S)
+              BACKUP_DIR="/tmp/backup-${DATE}"
+
+              echo "Starting MongoDB backup..."
+
+              mongodump \
+                --host mongo-0.mongo-headless.ecommerce.svc.cluster.local:27017 \
+                --db ecommerce \
+                --out ${BACKUP_DIR}
+
+              echo "Compressing backup..."
+              tar -czf /tmp/backup-${DATE}.tar.gz ${BACKUP_DIR}
+
+              echo "Uploading to S3..."
+              aws s3 cp \
+                /tmp/backup-${DATE}.tar.gz \
+                s3://YOUR-BACKUP-BUCKET/mongodb/${DATE}/
+
+              echo "Cleaning old backups (keep 7 days)..."
+              aws s3 ls s3://YOUR-BACKUP-BUCKET/mongodb/ | \
+                awk '{print $2}' | \
+                sort | \
+                head -n -7 | \
+                xargs -I {} aws s3 rm \
+                  s3://YOUR-BACKUP-BUCKET/mongodb/{} \
+                  --recursive
+
+              echo "Backup complete! ${DATE}"
+            env:
+            - name: AWS_DEFAULT_REGION
+              value: "ap-southeast-2"
+          restartPolicy: OnFailure

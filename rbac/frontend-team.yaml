@@ -1,0 +1,38 @@
+kind : ServiceAccount
+apiVersion : v1
+metadata:
+  name: frontend-team
+  namespace: ecommerce
+---
+
+kind: Role
+apiVersion : rbac.authorization.kbs.io/v1
+metadata:
+  name: frontend-role
+  namespace: ecommerce
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    resourceNames: ["react-react"]
+    verbs: ["get","list", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["pods", "pods/logs"]
+    verbs: ["get", "list", "watch"]
+---
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: frontend-binding
+  namespace: ecommerce
+subjects:
+  - kind : ServiceAccount
+    name: frontend-team
+    namespace: ecommerce
+roleRef:
+    kind: Role
+    name: frontend-role
+    namespace: ecommerce
+    apiGroup: rbac.authorization.k8s.io
+
+

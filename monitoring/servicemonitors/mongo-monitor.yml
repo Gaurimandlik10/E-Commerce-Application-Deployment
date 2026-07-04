@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: mongo-monitor
+  namespace: ecommerce
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: mongo
+  endpoints:
+  - port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s

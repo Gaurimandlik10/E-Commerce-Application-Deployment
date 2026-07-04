@@ -1,0 +1,53 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ecommerce-alerts
+  namespace: ecommerce
+spec:
+  groups:
+  - name: ecommerce-business-alerts
+    rules:
+
+    - alert: HighCartAbandonmentRate
+      expr: |
+        rate(cart_abandoned_total[10m]) > 0.5
+      for: 5m
+      labels:
+        severity: warning
+        team: business
+      annotations:
+        summary: "High cart abandonment rate!"
+        description: "Cart abandonment rate is high"
+
+    - alert: HighOrderFailureRate
+      expr: |
+        rate(order_failed_total[5m]) /
+        (rate(order_created_total[5m]) + 0.001) > 0.05
+      for: 2m
+      labels:
+        severity: critical
+        team: backend
+      annotations:
+        summary: "High order failure rate!"
+        description: "More than 5% orders are failing"
+
+    - alert: NodeAPIHighLatency
+      expr: |
+        histogram_quantile(0.95,
+          rate(http_request_duration_seconds_bucket[5m])
+        ) > 1
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Node API response time is high"
+
+    - alert: PodCrashLooping
+      expr: |
+        rate(kube_pod_container_status_restarts_total[15m]) > 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Pod is crash looping!"
+        description: "Pod {{ $labels.pod }} is restarting frequently"
