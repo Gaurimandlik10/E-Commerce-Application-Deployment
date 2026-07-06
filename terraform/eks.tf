@@ -13,13 +13,13 @@ module "eks" {
   eks_managed_node_groups = {
     main = {
       name           = "main-node-group"
-      instance_types = ["t3.medium"]
+      instance_types = ["c7i-flex.large"]
 
       min_size     = 2
       max_size     = 6
       desired_size = 3
 
-      ami_id  = "ami-0b6d9d3d33ba97d99"
+      ami_id  = "ami-06259b63260eddc13"
       disk_size = 20
 
       labels = {
