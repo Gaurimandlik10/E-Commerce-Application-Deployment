@@ -9,6 +9,11 @@ terraform {
       version = "~> 2.0"
     }
   }
+  backend "s3" {
+   bucket = "devopsprojectsgauri"  
+    key    = "ecommerce/terraform.tfstate"
+    region = "ap-southeast-2"
+  }
 }
 
 
