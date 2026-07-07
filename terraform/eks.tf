@@ -19,7 +19,6 @@ module "eks" {
       max_size     = 6
       desired_size = 3
 
-      ami_id  = "ami-06259b63260eddc13"
       disk_size = 20
 
       labels = {
