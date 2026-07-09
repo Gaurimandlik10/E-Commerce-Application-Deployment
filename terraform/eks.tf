@@ -116,25 +116,3 @@ provider "kubernetes" {
   }
 }
 
-# ── StorageClass ──
-resource "kubernetes_storage_class" "gp2" {
-  metadata {
-    name = "gp2"
-    annotations = {
-      "storageclass.kubernetes.io/is-default-class" = "true"
-    }
-  }
-
-  storage_provisioner    = "ebs.csi.aws.com"
-  volume_binding_mode    = "WaitForFirstConsumer"
-  reclaim_policy         = "Delete"
-  allow_volume_expansion = true
-
-  parameters = {
-    type   = "gp2"
-    fsType = "ext4"
-  }
-
-  depends_on = [aws_eks_addon.ebs_csi, 
-                aws_eks_access_policy_association.jenkins_admin ]
-}
