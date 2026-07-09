@@ -51,6 +51,24 @@ module "eks" {
   }
 }
 
+resource "aws_eks_access_entry" "jenkins_admin" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = data.aws_caller_identity.current.arn
+  type          = "STANDARD"
+}
+
+resource "aws_eks_access_policy_association" "jenkins_admin" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = data.aws_caller_identity.current.arn
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+
+  access_scope {
+    type = "cluster"
+  }
+
+  depends_on = [aws_eks_access_entry.jenkins_admin]
+}
+
 # ── EBS CSI IAM Role ──
 module "ebs_csi_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
@@ -117,5 +135,6 @@ resource "kubernetes_storage_class" "gp2" {
     fsType = "ext4"
   }
 
-  depends_on = [aws_eks_addon.ebs_csi]
+  depends_on = [aws_eks_addon.ebs_csi, 
+                aws_eks_access_policy_association.jenkins_admin ]
 }
