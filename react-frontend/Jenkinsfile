@@ -49,21 +49,19 @@ pipeline {
             }
         }
 
-        stage('Update Helm Values') {
-            steps {
-                sh """
-                    sed -i 's|tag:.*|tag: "${IMAGE_TAG}"|g' \
-                      helm/react-chart/values.yaml
-
-                    git config user.email "jenkins@ci.com"
-                    git config user.name "Jenkins"
-                    git add helm/react-chart/values.yaml
-                    git commit -m "ci: update react image to ${IMAGE_TAG}"
-                    git push origin main
-                """
-            }
-        }
+    stage('Update Helm Values') {
+    steps {
+        sh '''
+            git checkout -B main origin/main
+            sed -i 's|tag:.*|tag: "build-${BUILD_NUMBER}"|g' helm/react-chart/values.yaml
+            git config user.email "jenkins@ci.com"
+            git config user.name "Jenkins"
+            git add helm/react-chart/values.yaml
+            git commit -m "ci: update react image to build-${BUILD_NUMBER}"
+            git push origin main
+        '''
     }
+}
 
     post {
         success {
