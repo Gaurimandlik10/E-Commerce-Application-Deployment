@@ -10,7 +10,7 @@ resource "aws_ecr_repository" "node"{
     name = "ecommerce-node"
     force_delete = true
     tags = {
-        Name = "E commerce - node"
+        Name = "ecommerce-node"
     }
 }
 
