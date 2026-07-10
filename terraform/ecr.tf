@@ -2,7 +2,7 @@ resource "aws_ecr_repository" "react"{
     name = "ecommerce-react"
     force_delete = true
     tags = {
-        Name = "E commerce - react"
+        Name = "ecommerce-react"
     }
 }
 
