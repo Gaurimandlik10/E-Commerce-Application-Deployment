@@ -52,9 +52,9 @@ pipeline {
         stage('Update Helm Values') {
             steps {
                 withCredentials([string(
-                    credentialsId: 'Gaurimandlik10',
+                    credentialsId: 'github-pat-helm',
                     variable: 'GIT_TOKEN'
-                )]) {
+                )]) { {
                     sh """
                         git checkout -B main origin/main
 
