@@ -54,7 +54,7 @@ pipeline {
                 withCredentials([string(
                     credentialsId: 'github-pat-helm',
                     variable: 'GIT_TOKEN'
-                )]) { {
+                )]) { 
                     sh """
                         git checkout -B main origin/main
 
