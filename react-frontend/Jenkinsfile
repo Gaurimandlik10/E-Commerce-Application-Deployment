@@ -41,20 +41,33 @@ pipeline {
                 """
             }
         }
-        stage('Update Helm Values') {
-            steps {
-                sh '''
-                    git checkout -B main origin/main
-                    sed -i 's|tag:.*|tag: "build-${BUILD_NUMBER}"|g' helm/react-chart/values.yaml
-                    git config user.email "jenkins@ci.com"
-                    git config user.name "Jenkins"
-                    git add helm/react-chart/values.yaml
-                    git commit -m "ci: update react image to build-${BUILD_NUMBER}"
-                    git push origin main
-                '''
-            }
+     stage('Update Helm Values') {
+    steps {
+        withCredentials([string(
+            credentialsId: 'Gaurimandlik10',
+            variable: 'Gaurimandlik10'
+        )]) {
+            sh """
+                git checkout -B main origin/main
+
+                sed -i 's|tag:.*|tag: "build-${BUILD_NUMBER}"|g' \
+                  helm/react-chart/values.yaml
+
+                git config user.email "jenkins@ci.com"
+                git config user.name "Jenkins"
+
+                git add helm/react-chart/values.yaml
+
+                git commit -m "ci: update react image to build-${BUILD_NUMBER}"
+
+                git remote set-url origin \
+                  https://${GIT_TOKEN}@github.com/Gaurimandlik10/E-Commerce-Application-Deployment.git
+
+                git push origin main
+            """
         }
     }
+}
     post {
         success {
             echo '✅ React pipeline success! Argo CD will deploy!'
