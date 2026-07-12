@@ -13,14 +13,6 @@ pipeline {
 
     stages {
 
-        stage('Git Checkout') {
-            steps {
-                git branch: 'main',
-                    credentialsId: 'github-token',
-                    url: 'https://github.com/Gaurimandlik10/E-Commerce-Application-Deployment.git'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 sh "docker build -t ${ECR_REPO}:${IMAGE_TAG} ./react-frontend/"
@@ -60,7 +52,7 @@ pipeline {
         stage('Update Helm Values') {
             steps {
                 withCredentials([string(
-                    credentialsId: 'github-token',
+                    credentialsId: 'Gaurimandlik10',
                     variable: 'GIT_TOKEN'
                 )]) {
                     sh """
