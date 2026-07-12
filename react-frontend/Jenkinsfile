@@ -42,8 +42,8 @@ pipeline {
             }
         }
      stage('Update Helm Values') {
-    steps {
-        withCredentials([string(
+        steps {
+          withCredentials([string(
             credentialsId: 'Gaurimandlik10',
             variable: 'Gaurimandlik10'
         )]) {
@@ -67,8 +67,8 @@ pipeline {
             """
         }
     }
-}
-    post {
+  }
+ post {
         success {
             echo '✅ React pipeline success! Argo CD will deploy!'
         }
