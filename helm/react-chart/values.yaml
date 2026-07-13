@@ -2,7 +2,7 @@ replicaCount: 2
 
 image:
   repository: ""
-  tag: "build-19"
+  tag: "build-20"
   pullPolicy: Always
 
 service:
